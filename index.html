@@ -4,18 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>For Cutieka ❤️</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        /* --- THEME --- */
+        /* --- THEME VARIABLES --- */
         :root {
             --primary: #d6336c;
-            --primary-light: #ff87a3; 
             --secondary: #ff99ac;
-            --bg-color: #fff0f3;
+            --bg-grad-start: #fff0f3;
+            --bg-grad-end: #ffe3e3;
             --text-dark: #4a154b;
             --card-bg: rgba(255, 255, 255, 0.96); 
+            
+            /* Night Mode Colors */
+            --bg-night-deep: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -25,9 +32,45 @@
             font-family: 'Nunito', sans-serif;
             color: var(--text-dark);
             overflow-x: hidden;
-            scroll-behavior: smooth;
-            background: linear-gradient(180deg, #fff0f3 0%, #ffe3e3 100%);
+            background: linear-gradient(180deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+            overscroll-behavior-y: none;
+            transition: background 1.5s ease-in-out; /* Smooth Night Transition */
         }
+
+        /* --- NIGHT MODE STYLES (Magical Transformation) --- */
+        body.night-mode {
+            background: var(--bg-night-deep);
+        }
+
+        /* In night mode, text turns white */
+        body.night-mode h1, 
+        body.night-mode h2, 
+        body.night-mode h3, 
+        body.night-mode p,
+        body.night-mode .hero-subtitle,
+        body.night-mode .time-label,
+        body.night-mode .chat-caption {
+            color: #fff !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transition: color 1s;
+        }
+
+        /* In night mode, Cards turn into Frosted Glass */
+        body.night-mode .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        body.night-mode .time-box {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+        }
+        
+        body.night-mode .time-val { color: white; }
 
         /* --- ENVELOPE INTRO --- */
         #intro-overlay {
@@ -35,6 +78,7 @@
             background: #fff0f3; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 1s ease-out;
+            will-change: opacity;
         }
 
         .envelope-container {
@@ -77,6 +121,7 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100;
             cursor: pointer; border: 2px solid var(--primary); display: none;
+            transform: translate3d(0,0,0);
         }
         .playing { animation: spin 5s linear infinite; }
 
@@ -91,6 +136,10 @@
             background: -webkit-linear-gradient(45deg, #d6336c, #ff87a3);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             opacity: 0; animation: fadeIn 2s ease 0.5s forwards;
+        }
+        /* Override for night mode */
+        body.night-mode .hero-name {
+            background: none; -webkit-text-fill-color: white; color: white;
         }
 
         .hero-heart {
@@ -107,14 +156,18 @@
         /* --- SECTIONS --- */
         section { padding: 40px 20px; max-width: 800px; margin: 0 auto; }
         
+        /* content-visibility optimization */
         .card { 
             background: var(--card-bg); border-radius: 24px; padding: 30px 25px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid white;
+            content-visibility: auto; contain-intrinsic-size: 100px 500px;
+            transition: background 1s, backdrop-filter 1s;
         }
         
         h2 { 
             font-family: 'Great Vibes', cursive; font-size: 3rem; text-align: center; 
             color: var(--primary); margin-bottom: 35px;
+            transition: color 1s;
         }
 
         /* --- COUNTDOWN --- */
@@ -122,8 +175,9 @@
         .time-box {
             background: white; border-radius: 16px; padding: 12px; width: 75px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #ffe3e3;
+            transition: background 1s;
         }
-        .time-val { font-size: 1.6rem; font-weight: 800; color: var(--primary); display: block; }
+        .time-val { font-size: 1.6rem; font-weight: 800; color: var(--primary); display: block; font-variant-numeric: tabular-nums; }
         .time-label { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
 
         /* --- CHAT SCROLLER --- */
@@ -143,19 +197,13 @@
         .location-dot { width: 14px; height: 14px; background: var(--primary); border-radius: 50%; position: relative; }
         .distance-line { flex-grow: 1; height: 2px; background: #ff99ac; margin: 0 15px; position: relative; }
         .distance-line::after { content: '✈️'; position: absolute; top: -11px; left: 50%; transform: translateX(-50%); animation: fly 4s infinite alternate ease-in-out; font-size: 1.2rem; }
+        
+        body.night-mode .map-container, body.night-mode .timeline-item::before { color: white; }
+        body.night-mode .location-dot { background: white; box-shadow: 0 0 10px white; }
 
         .timeline-item { position: relative; padding-left: 30px; margin-bottom: 40px; border-left: 3px solid var(--secondary); }
-        .timeline-item::before { content: '❤️'; position: absolute; left: -10px; top: 0; background: #fff0f3; font-size: 1rem; color: var(--primary); }
+        .timeline-item::before { content: '❤️'; position: absolute; left: -10px; top: 0; background: transparent; font-size: 1rem; color: var(--primary); }
         .date-badge { background: var(--secondary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 8px; }
-
-        /* --- QUIZ STYLES --- */
-        .quiz-option {
-            width: 100%; padding: 15px; margin: 8px 0; border: 2px solid #ffe3e3;
-            background: white; border-radius: 50px; font-size: 1rem; color: #555;
-            cursor: pointer; transition: 0.2s;
-        }
-        .quiz-option.correct { background: #d6336c; color: white; border-color: #d6336c; animation: pulse 0.5s; }
-        .quiz-option.wrong { background: #fab005; color: white; border-color: #fab005; animation: shake 0.4s; }
 
         /* --- BUTTONS --- */
         .big-btn { 
@@ -174,6 +222,15 @@
             display: block; margin: 10px auto;
         }
 
+        /* Cooldown State for Button */
+        .secondary-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #eee;
+            border-color: #ddd;
+            color: #999;
+        }
+
         .no-btn {
             position: relative; 
             background: rgba(255, 255, 255, 0.4); color: #aaa; border: 1px solid #ccc;
@@ -186,6 +243,7 @@
             margin-top: 15px; font-size: 0.9rem; text-decoration: none;
             border-bottom: 1px solid transparent; cursor: pointer; transition: 0.3s;
         }
+        body.night-mode .nav-btn { color: white; }
 
         /* --- MODAL --- */
         .modal-overlay {
@@ -203,6 +261,15 @@
         .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
         .modal-title { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--primary); margin: 0; }
 
+        /* --- QUIZ --- */
+        .quiz-option {
+            width: 100%; padding: 15px; margin: 8px 0; border: 2px solid #ffe3e3;
+            background: white; border-radius: 50px; font-size: 1rem; color: #555;
+            cursor: pointer; transition: 0.2s;
+        }
+        .quiz-option.correct { background: #d6336c; color: white; border-color: #d6336c; animation: pulse 0.5s; }
+        .quiz-option.wrong { background: #fab005; color: white; border-color: #fab005; animation: shake 0.4s; }
+
         /* --- ANIMATIONS --- */
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -216,7 +283,8 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        /* Scroll Reveal (Optimized) */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; will-change: opacity, transform; }
         .reveal.active { opacity: 1; transform: translateY(0); }
         
         .hidden { display: none !important; }
@@ -234,8 +302,13 @@
     </div>
 
     <div class="music-player" onclick="toggleMusic()">💿</div>
-    <audio id="bgMusic" loop>
+    
+    <audio id="bgMusic" loop preload="auto">
         <source src="song.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="celebrationMusic" loop preload="auto">
+        <source src="celebration.mp3" type="audio/mpeg">
     </audio>
 
     <header id="top">
@@ -262,11 +335,12 @@
                 </div>
             </div>
 
-            <div id="anniversary-message" class="hidden" style="text-align: center; animation: popIn 0.8s;">
+            <div id="anniversary-message" class="hidden" style="text-align: center;">
                 <h2 style="font-family: 'Great Vibes', cursive; font-size: 3.5rem; color: var(--primary); margin: 0;">Happy Anniversary!</h2>
                 <p style="font-size: 1.2rem; color: #555;">2 Years of Magic & Memories.</p>
                 <div style="font-size: 4rem; margin: 15px 0; animation: pulse 1s infinite;">🎉</div>
-                <button class="secondary-btn" onclick="replayCelebration()">Replay the Magic ↺</button>
+                
+                <button id="celebrateBtn" class="secondary-btn" onclick="triggerNightMode()">Celebrate Again 🎆</button>
             </div>
         </div>
     </section>
@@ -339,27 +413,27 @@
             </p>
             <div class="chat-scroller">
                 <div class="chat-item">
-                    <img src="chat1.jpg" class="chat-img" alt="Memory 1" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat1.jpg'">
+                    <img src="chat1.jpg" loading="lazy" class="chat-img" alt="Memory 1" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat1.jpg'">
                     <div class="chat-caption">First "I Love You"</div>
                 </div>
 
                 <div class="chat-item">
-                    <img src="chat2.jpg" class="chat-img" alt="Memory 2" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat2.jpg'">
+                    <img src="chat2.jpg" loading="lazy" class="chat-img" alt="Memory 2" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat2.jpg'">
                     <div class="chat-caption">The Time We Met</div>
                 </div>
 
                 <div class="chat-item">
-                    <img src="chat3.jpg" class="chat-img" alt="Memory 3" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat3.jpg'">
+                    <img src="chat3.jpg" loading="lazy" class="chat-img" alt="Memory 3" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat3.jpg'">
                     <div class="chat-caption">Heart to Heart</div>
                 </div>
 
                 <div class="chat-item">
-                    <img src="chat4.jpg" class="chat-img" alt="Memory 4" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat4.jpg'">
+                    <img src="chat4.jpg" loading="lazy" class="chat-img" alt="Memory 4" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat4.jpg'">
                     <div class="chat-caption">Birthday Love</div>
                 </div>
 
                 <div class="chat-item">
-                    <img src="chat5.jpg" class="chat-img" alt="Memory 5" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat5.jpg'">
+                    <img src="chat5.jpg" loading="lazy" class="chat-img" alt="Memory 5" onerror="this.src='https://placehold.co/250x400/ffb3c1/white?text=Add+chat5.jpg'">
                     <div class="chat-caption">Sweet Memories</div>
                 </div>
             </div>
@@ -391,7 +465,7 @@
                 </p>
                 <h2 style="color: var(--primary); margin-bottom: 35px; font-size: 2.2rem;">Will you be my Valentine?</h2>
                 
-                <button class="big-btn" onclick="celebrate()">YES! ❤️</button>
+                <button class="big-btn" onclick="celebrateValentine()">YES! ❤️</button>
                 <br>
                 <button class="no-btn" id="runAwayBtn" onmouseover="runAway()" ontouchstart="runAway()">No</button>
                 <br>
@@ -401,9 +475,13 @@
     </div>
 
     <script>
-        // --- IMPORTANT: REPLACE WITH YOUR NUMBER ---
-        // Format: Country Code + Number (e.g., 919999999999)
         const phoneNumber = "919827700975"; 
+        
+        // --- 1. SET THE ACTUAL ANNIVERSARY DATE ---
+        const anniversary = new Date("February 17, 2026 00:00:00").getTime();
+
+        // Active Audio State
+        let activeAudio = "bgMusic"; 
 
         function startExperience() {
             document.getElementById('envelope').classList.add('open');
@@ -429,7 +507,8 @@
         }
 
         function toggleMusic() {
-            var audio = document.getElementById("bgMusic");
+            // Controls whichever audio is currently "active"
+            var audio = document.getElementById(activeAudio);
             var btn = document.querySelector(".music-player");
             if (audio.paused) {
                 audio.play();
@@ -451,15 +530,12 @@
             document.getElementById('countdown-section').scrollIntoView({behavior: 'smooth'});
         }
 
-        // --- RUN AWAY BUTTON LOGIC ---
         function runAway() {
             const btn = document.getElementById('runAwayBtn');
             const modal = document.querySelector('.modal-box');
             
-            // Calculate boundaries within the modal
             const maxX = modal.clientWidth - btn.clientWidth - 40;
             const maxY = modal.clientHeight - btn.clientHeight - 40;
-            
             const randomX = Math.random() * maxX;
             const randomY = Math.random() * maxY;
 
@@ -471,16 +547,15 @@
         function checkAnswer(btn, isCorrect) {
             if (isCorrect) {
                 btn.classList.add('correct');
-                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
             } else {
                 btn.classList.add('wrong');
                 setTimeout(() => btn.classList.remove('wrong'), 500);
             }
         }
 
-        // --- CELEBRATION (YES BUTTON CLICK) ---
-        function celebrate() {
-            // Replace modal content with OPTIONAL notification
+        // --- VALENTINE LOGIC (NO FIREWORKS, JUST MESSAGE) ---
+        function celebrateValentine() {
             const modalBox = document.querySelector('.modal-box');
             modalBox.innerHTML = `
                 <div style="animation: popIn 0.8s forwards;">
@@ -497,62 +572,119 @@
                     </div>
                     
                     <button class="secondary-btn" onclick="goToCountdown()">See Countdown ⏳</button>
-                    <button class="nav-btn" onclick="location.href='#top'">Back to Start ↑</button>
+                    <button class="nav-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('valentineModal').classList.remove('active');">Back to Start ↑</button>
                 </div>
             `;
-
-            triggerEffects();
+            // Simple confetti for Yes
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
         }
 
         function sendWhatsapp() {
-            // This is the message she will send to you
             const msg = encodeURIComponent("I said YES! ❤️ This was the sweetest surprise ever. Even from 500km away, you make me the happiest girl. I love you so much! 🌹");
-            
             window.location.href = `https://wa.me/${phoneNumber}?text=${msg}`;
         }
 
-        function triggerEffects() {
-            // Confetti
-            var duration = 3 * 1000;
+        // --- ANNIVERSARY & AUDIO SWITCHING LOGIC ---
+        
+        let anniversaryTriggered = false; 
+
+        function startAnniversaryCelebration() {
+            // 1. Transform Background to Night Mode
+            document.body.classList.add('night-mode');
+
+            // 2. Hide Timer / Show Message
+            const timer = document.getElementById("countdown-content");
+            const msg = document.getElementById("anniversary-message");
+            
+            if(timer.style.display !== 'none') {
+                timer.style.display = 'none';
+                msg.classList.remove('hidden');
+                msg.style.animation = 'popIn 0.8s';
+            }
+
+            // 3. Switch Audio Tracks
+            var oldAudio = document.getElementById("bgMusic");
+            var newAudio = document.getElementById("celebrationMusic");
+            
+            // Fade out old, play new
+            oldAudio.pause();
+            newAudio.volume = 1.0;
+            newAudio.play().catch(e => console.log("Auto-play blocked:", e));
+            
+            // Update active audio variable so the toggle button works for the NEW song
+            activeAudio = "celebrationMusic";
+
+            // 4. Trigger Fireworks
+            triggerNightMode(); 
+        }
+
+        // --- ANTI-LAG FIREWORKS SYSTEM ---
+        let isCelebrating = false; // Debounce flag
+
+        function triggerNightMode() {
+            if (isCelebrating) return; // Stop if already running
+            
+            isCelebrating = true;
+            const btn = document.getElementById('celebrateBtn');
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = "Enjoy the show... 🎆";
+            }
+
+            document.body.classList.add('night-mode');
+            
+            var duration = 12 * 1000; // 12 Seconds
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 99999 };
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 11000 };
+            var colors = ['#ff0000', '#ffa500', '#ffff00', '#00ff00', '#00ffff', '#ffffff'];
 
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) { return clearInterval(interval); }
-                var particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-            }, 250);
 
-            // Falling Hearts
-            for(let i=0; i<30; i++) {
-                const heart = document.createElement('div');
-                heart.innerHTML = '❤️';
-                heart.style.position = 'fixed';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.top = '-10vh';
-                heart.style.fontSize = Math.random() * 25 + 10 + 'px';
-                heart.style.animation = `fall ${Math.random() * 2 + 3}s linear forwards`;
-                heart.style.zIndex = '100000'; 
-                document.body.appendChild(heart);
-            }
-            const style = document.createElement('style');
-            style.innerHTML = `@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }`;
-            document.head.appendChild(style);
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    isCelebrating = false; // Unlock button
+                    if(btn) {
+                        btn.disabled = false;
+                        btn.innerText = "Celebrate Again 🎆";
+                    }
+                    return;
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                
+                confetti(Object.assign({}, defaults, { 
+                    particleCount, 
+                    origin: { x: Math.random() * 0.5, y: Math.random() - 0.2 },
+                    colors: colors,
+                    shapes: ['circle'], 
+                    gravity: 1.2,
+                    scalar: 0.75,
+                    disableForReducedMotion: true
+                }));
+
+                confetti(Object.assign({}, defaults, { 
+                    particleCount, 
+                    origin: { x: Math.random() * 0.5 + 0.5, y: Math.random() - 0.2 },
+                    colors: colors,
+                    shapes: ['circle'],
+                    gravity: 1.2,
+                    scalar: 0.75,
+                    disableForReducedMotion: true
+                }));
+            }, 250);
         }
 
         // --- COUNTDOWN LOGIC ---
         function updateCountdown() {
-            const anniversary = new Date("February 17, 2026 00:00:00").getTime();
             const now = new Date().getTime();
             const diff = anniversary - now;
 
             if (diff < 0) {
-                // If countdown just ended, show celebration content
-                if(document.getElementById("countdown-content").style.display !== "none") {
-                    document.getElementById("countdown-content").style.display = "none";
-                    document.getElementById("anniversary-message").classList.remove("hidden");
-                    replayCelebration();
+                // Check if we already triggered the auto-start to avoid loops
+                if (!anniversaryTriggered) {
+                    anniversaryTriggered = true;
+                    startAnniversaryCelebration();
                 }
                 return;
             }
@@ -568,36 +700,20 @@
             document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
         }
 
-        function replayCelebration() {
-            // Big blast for anniversary
-            confetti({
-                particleCount: 150,
-                spread: 100,
-                origin: { y: 0.6 },
-                zIndex: 10000
-            });
-            // Also fire side cannons
-            confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
-            confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
-        }
-
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
         // --- SCROLL REVEAL ---
-        function reveal() {
-            var reveals = document.querySelectorAll(".reveal");
-            for (var i = 0; i < reveals.length; i++) {
-                var windowHeight = window.innerHeight;
-                var elementTop = reveals[i].getBoundingClientRect().top;
-                var elementVisible = 50; 
-                if (elementTop < windowHeight - elementVisible) {
-                    reveals[i].classList.add("active");
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); 
                 }
-            }
-        }
-        window.addEventListener("scroll", reveal);
-        reveal();
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
     </script>
 </body>
 </html>
